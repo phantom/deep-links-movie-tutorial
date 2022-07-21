@@ -3,6 +3,7 @@
     "name": "phantom-deeplinks-tutorial",
     "slug": "phantom-deeplinks-tutorial",
     "version": "1.0.0",
+    "scheme": "phantom-deeplinks-tutorial",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -14,9 +15,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
