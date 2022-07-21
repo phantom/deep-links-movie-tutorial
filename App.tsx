@@ -10,10 +10,12 @@ import nacl from "tweetnacl";
 import bs58 from "bs58";
 import { PublicKey } from "@solana/web3.js";
 import { decryptPayload } from "./utils/decryptPayload";
-
-const BASE_URL = "https://phantom.app/ul/v1/";
+import { BASE_URL } from "./constants";
+import { encryptPayload } from "./utils/encryptPayload";
+import { buildUrl } from "./utils/buildUrl";
 
 const onConnectRedirectLink = Linking.createURL("onConnect");
+const onDisconnectRedirectLink = Linking.createURL("onDisconnect");
 
 export default function App() {
   const [deeplink, setDeepLink] = useState<string>("");
@@ -22,7 +24,7 @@ export default function App() {
   const [sharedSecret, setSharedSecret] = useState<Uint8Array>();
   const [session, setSession] = useState<string>();
   const [phantomWalletPublicKey, setPhantomWalletPublicKey] =
-    useState<PublicKey>();
+    useState<PublicKey | null>();
 
   useEffect(() => {
     const initializeDeeplinks = async () => {
@@ -57,8 +59,6 @@ export default function App() {
 
     // Handle a `connect` response from Phantom
     if (/onConnect/.test(url.pathname)) {
-      console.log("we're connecting! deeplink: ", deeplink);
-
       const sharedSecretDapp = nacl.box.before(
         bs58.decode(params.get("phantom_encryption_public_key")!),
         dappKeyPair.secretKey
@@ -73,6 +73,13 @@ export default function App() {
       setSharedSecret(sharedSecretDapp);
       setSession(connectData.session);
       setPhantomWalletPublicKey(new PublicKey(connectData.public_key));
+      console.log(`connected to ${connectData.public_key.toString()}`);
+    }
+
+    // Handle a `disconnect` response from Phantom
+    if (/onDisconnect/.test(url.pathname)) {
+      setPhantomWalletPublicKey(null);
+      console.log("disconnected");
     }
   }, [deeplink]);
 
@@ -85,9 +92,29 @@ export default function App() {
       redirect_link: onConnectRedirectLink,
     });
 
-    const myUrl = `${BASE_URL}connect?${params.toString()}`;
+    const url = buildUrl("connect", params);
 
-    Linking.openURL(myUrl);
+    Linking.openURL(url);
+  };
+
+  // Initiate a disconnect from Phantom
+  const disconnect = async () => {
+    const payload = {
+      session,
+    };
+
+    const [nonce, encryptedPayload] = encryptPayload(payload, sharedSecret);
+
+    const params = new URLSearchParams({
+      dapp_encryption_public_key: bs58.encode(dappKeyPair.publicKey),
+      nonce: bs58.encode(nonce),
+      redirect_link: onDisconnectRedirectLink,
+      payload: bs58.encode(encryptedPayload),
+    });
+
+    const url = buildUrl("disconnect", params);
+
+    Linking.openURL(url);
   };
 
   return (
@@ -97,6 +124,7 @@ export default function App() {
         <>
           <Text>Connected with:</Text>
           <Text>{phantomWalletPublicKey.toString()}</Text>
+          <Button title="Disconnect" onPress={disconnect} />
         </>
       ) : (
         <Button title="Connect" onPress={connect} />
