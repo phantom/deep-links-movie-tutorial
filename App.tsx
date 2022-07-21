@@ -10,9 +10,9 @@ import nacl from "tweetnacl";
 import bs58 from "bs58";
 import { PublicKey } from "@solana/web3.js";
 import { decryptPayload } from "./utils/decryptPayload";
-import { BASE_URL } from "./constants";
 import { encryptPayload } from "./utils/encryptPayload";
 import { buildUrl } from "./utils/buildUrl";
+import { MovieList } from "./components/MovieList";
 
 const onConnectRedirectLink = Linking.createURL("onConnect");
 const onDisconnectRedirectLink = Linking.createURL("onDisconnect");
@@ -129,6 +129,7 @@ export default function App() {
       ) : (
         <Button title="Connect" onPress={connect} />
       )}
+      <MovieList />
       <StatusBar style="auto" />
     </View>
   );
@@ -140,5 +141,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+    marginTop: 100,
   },
 });
