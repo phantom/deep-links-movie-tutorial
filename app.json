@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "phantom-deeplinks-tutorial",
-    "slug": "phantom-deeplinks-tutorial",
+    "name": "deep-links-movie-tutorial",
+    "slug": "deep-links-movie-tutorial",
     "version": "1.0.0",
-    "scheme": "phantom-deeplinks-tutorial",
+    "scheme": "deep-links-movie-tutorial",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
