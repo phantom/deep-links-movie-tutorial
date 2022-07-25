@@ -4,7 +4,7 @@ import { Buffer } from "buffer";
 global.Buffer = global.Buffer || Buffer;
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, Button, SafeAreaView } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import * as Linking from "expo-linking";
 import nacl from "tweetnacl";
 import bs58 from "bs58";
@@ -13,6 +13,8 @@ import { decryptPayload } from "./utils/decryptPayload";
 import { encryptPayload } from "./utils/encryptPayload";
 import { buildUrl } from "./utils/buildUrl";
 import { MovieList } from "./components/MovieList";
+import Button from "./components/Button";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 const onConnectRedirectLink = Linking.createURL("onConnect");
 const onDisconnectRedirectLink = Linking.createURL("onDisconnect");
@@ -117,21 +119,39 @@ export default function App() {
     Linking.openURL(url);
   };
 
+  const addReview = async () => {
+    console.log("adding review");
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
-      <Text>Deep Links Movie Tutorial</Text>
-      {phantomWalletPublicKey ? (
-        <>
-          <Text>Connected with:</Text>
-          <Text>{phantomWalletPublicKey.toString()}</Text>
-          <Button title="Disconnect" onPress={disconnect} />
-        </>
-      ) : (
-        <Button title="Connect Phantom" onPress={connect} />
-      )}
-      <MovieList />
-      <StatusBar style="auto" />
-    </SafeAreaView>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          {phantomWalletPublicKey ? (
+            <>
+              <View style={[styles.row, styles.wallet]}>
+                <View style={styles.greenDot} />
+                <Text
+                  style={styles.text}
+                  numberOfLines={1}
+                  ellipsizeMode="middle"
+                >
+                  {phantomWalletPublicKey.toString()}
+                </Text>
+              </View>
+              <View style={styles.row}>
+                <Button title="Add Review" onPress={addReview} />
+                <Button title="Disconnect" onPress={disconnect} />
+              </View>
+            </>
+          ) : (
+            <Button title="Connect Phantom" onPress={connect} />
+          )}
+        </View>
+        <MovieList />
+        <StatusBar style="auto" />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
@@ -139,8 +159,29 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "rgb(34, 34, 34)",
-    alignItems: "center",
-    justifyContent: "center",
     flexGrow: 1,
+  },
+  greenDot: {
+    height: 8,
+    width: 8,
+    borderRadius: 10,
+    marginRight: 5,
+    backgroundColor: "rgb(33, 229, 111)",
+  },
+  header: {
+    width: "95%",
+    marginLeft: "auto",
+    marginRight: "auto",
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  text: {
+    color: "rgb(119, 119, 119)",
+  },
+  wallet: {
+    alignItems: "center",
+    marginBottom: 10,
   },
 });

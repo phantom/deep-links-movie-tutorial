@@ -63,7 +63,7 @@ export const MovieList: FC = () => {
         data={movies}
         onEndReached={() => setPage(page + 1)}
         contentContainerStyle={styles.list}
-        renderItem={({ item, index, separators }) => (
+        renderItem={({ item, index }) => (
           <View style={styles.item} key={index}>
             <View style={styles.itemHeader}>
               <Text ellipsizeMode="tail" numberOfLines={1} style={styles.title}>
@@ -88,7 +88,6 @@ export const MovieList: FC = () => {
 const styles = StyleSheet.create({
   description: {
     color: "rgb(119, 119, 119)",
-
     fontSize: 14,
   },
   input: {
@@ -96,7 +95,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 14,
     backgroundColor: "rgb(24, 24, 24)",
-
     borderColor: "rgb(91, 91, 91)",
     borderRadius: 6,
     color: "white",
