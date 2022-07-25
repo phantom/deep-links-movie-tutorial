@@ -4,7 +4,7 @@ import { Buffer } from "buffer";
 global.Buffer = global.Buffer || Buffer;
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, Button } from "react-native";
+import { StyleSheet, Text, View, Button, SafeAreaView } from "react-native";
 import * as Linking from "expo-linking";
 import nacl from "tweetnacl";
 import bs58 from "bs58";
@@ -118,8 +118,8 @@ export default function App() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text>Phantom Deeplinking Tutorial</Text>
+    <SafeAreaView style={styles.container}>
+      <Text>Deep Links Movie Tutorial</Text>
       {phantomWalletPublicKey ? (
         <>
           <Text>Connected with:</Text>
@@ -127,20 +127,20 @@ export default function App() {
           <Button title="Disconnect" onPress={disconnect} />
         </>
       ) : (
-        <Button title="Connect" onPress={connect} />
+        <Button title="Connect Phantom" onPress={connect} />
       )}
       <MovieList />
       <StatusBar style="auto" />
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "rgb(34, 34, 34)",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 100,
+    flexGrow: 1,
   },
 });
