@@ -1,13 +1,17 @@
-import { FC, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Movie } from "../models/Movie";
-import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
+import { Connection } from "@solana/web3.js";
 import { MovieCoordinator } from "./MovieCoordinator";
-import { FlatList, View, Text, TextInput, StyleSheet } from "react-native";
+import { FlatList, View, Text, StyleSheet } from "react-native";
 import Input from "./Input";
 
-const connection = new Connection(clusterApiUrl("devnet"));
+// const connection = new Connection(clusterApiUrl("devnet"));
 
-export const MovieList: FC = () => {
+interface MovieListProps {
+  connection: Connection;
+}
+
+export default function MovieList({ connection }: MovieListProps) {
   const [movies, setMovies] = useState<(Movie | null)[]>([]);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -57,13 +61,6 @@ export const MovieList: FC = () => {
         placeholder="Search movies..."
         onChangeText={setSearch}
       />
-      {/* <TextInput
-        value={search}
-        placeholder="Search movies..."
-        placeholderTextColor="rgb(119, 119, 119)"
-        onChangeText={setSearch}
-        style={styles.input}
-      /> */}
       <FlatList
         ItemSeparatorComponent={() => <View style={{ marginTop: 20 }} />}
         data={movies}
@@ -89,22 +86,12 @@ export const MovieList: FC = () => {
       />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   description: {
     color: "rgb(119, 119, 119)",
     fontSize: 14,
-  },
-  input: {
-    margin: 12,
-    borderWidth: 1,
-    padding: 14,
-    backgroundColor: "rgb(24, 24, 24)",
-    borderColor: "rgb(91, 91, 91)",
-    borderRadius: 6,
-    color: "white",
-    fontSize: 16,
   },
   item: {
     flexGrow: 1,

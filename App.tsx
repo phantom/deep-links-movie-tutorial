@@ -8,11 +8,16 @@ import { StyleSheet, Text, View } from "react-native";
 import * as Linking from "expo-linking";
 import nacl from "tweetnacl";
 import bs58 from "bs58";
-import { PublicKey } from "@solana/web3.js";
+import {
+  clusterApiUrl,
+  Connection,
+  PublicKey,
+  Transaction,
+} from "@solana/web3.js";
 import { decryptPayload } from "./utils/decryptPayload";
 import { encryptPayload } from "./utils/encryptPayload";
 import { buildUrl } from "./utils/buildUrl";
-import { MovieList } from "./components/MovieList";
+import MovieList from "./components/MovieList";
 import Button from "./components/Button";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import ActionSheet from "react-native-actions-sheet";
@@ -20,6 +25,11 @@ import AddReviewSheet from "./components/AddReviewSheet";
 
 const onConnectRedirectLink = Linking.createURL("onConnect");
 const onDisconnectRedirectLink = Linking.createURL("onDisconnect");
+const onSignAndSendTransactionRedirectLink = Linking.createURL(
+  "onSignAndSendTransaction"
+);
+
+const connection = new Connection(clusterApiUrl("devnet"));
 
 export default function App() {
   const [deeplink, setDeepLink] = useState<string>("");
@@ -28,10 +38,11 @@ export default function App() {
   const [sharedSecret, setSharedSecret] = useState<Uint8Array>();
   const [session, setSession] = useState<string>();
   const [phantomWalletPublicKey, setPhantomWalletPublicKey] =
-    useState<PublicKey | null>();
+    useState<PublicKey | null>(null);
 
   const actionSheetRef = useRef<ActionSheet>(null);
 
+  // Initialize our app's deeplinking protocol on app start-up
   useEffect(() => {
     const initializeDeeplinks = async () => {
       const initialUrl = await Linking.getInitialURL();
@@ -69,13 +80,11 @@ export default function App() {
         bs58.decode(params.get("phantom_encryption_public_key")!),
         dappKeyPair.secretKey
       );
-
       const connectData = decryptPayload(
         params.get("data")!,
         params.get("nonce")!,
         sharedSecretDapp
       );
-
       setSharedSecret(sharedSecretDapp);
       setSession(connectData.session);
       setPhantomWalletPublicKey(new PublicKey(connectData.public_key));
@@ -87,6 +96,17 @@ export default function App() {
       setPhantomWalletPublicKey(null);
       console.log("disconnected");
     }
+
+    // Handle a `signAndSendTransaction` response from Phantom
+    if (/onSignAndSendTransaction/.test(url.pathname)) {
+      actionSheetRef.current?.hide();
+      const signAndSendTransactionData = decryptPayload(
+        params.get("data")!,
+        params.get("nonce")!,
+        sharedSecret
+      );
+      console.log("signAndSendTrasaction: ", signAndSendTransactionData);
+    }
   }, [deeplink]);
 
   // Initiate a new connection to Phantom
@@ -97,9 +117,7 @@ export default function App() {
       app_url: "https://phantom.app",
       redirect_link: onConnectRedirectLink,
     });
-
     const url = buildUrl("connect", params);
-
     Linking.openURL(url);
   };
 
@@ -108,23 +126,43 @@ export default function App() {
     const payload = {
       session,
     };
-
     const [nonce, encryptedPayload] = encryptPayload(payload, sharedSecret);
-
     const params = new URLSearchParams({
       dapp_encryption_public_key: bs58.encode(dappKeyPair.publicKey),
       nonce: bs58.encode(nonce),
       redirect_link: onDisconnectRedirectLink,
       payload: bs58.encode(encryptedPayload),
     });
-
     const url = buildUrl("disconnect", params);
-
     Linking.openURL(url);
   };
 
-  const addReview = async () => {
-    console.log("adding review test again");
+  // Initiate a new transaction via Phantom. We call this in `AddReviewSheet.tsx` to send our review to the Solana network
+  const signAndSendTransaction = async (transaction: Transaction) => {
+    if (!phantomWalletPublicKey) return;
+    transaction.feePayer = phantomWalletPublicKey;
+    transaction.recentBlockhash = (
+      await connection.getLatestBlockhash()
+    ).blockhash;
+    const serializedTransaction = transaction.serialize({
+      requireAllSignatures: false,
+    });
+    const payload = {
+      session,
+      transaction: bs58.encode(serializedTransaction),
+    };
+    const [nonce, encryptedPayload] = encryptPayload(payload, sharedSecret);
+    const params = new URLSearchParams({
+      dapp_encryption_public_key: bs58.encode(dappKeyPair.publicKey),
+      nonce: bs58.encode(nonce),
+      redirect_link: onSignAndSendTransactionRedirectLink,
+      payload: bs58.encode(encryptedPayload),
+    });
+    const url = buildUrl("signAndSendTransaction", params);
+    Linking.openURL(url);
+  };
+
+  const openAddReviewSheet = () => {
     actionSheetRef.current?.show();
   };
 
@@ -145,7 +183,7 @@ export default function App() {
                 </Text>
               </View>
               <View style={styles.row}>
-                <Button title="Add Review" onPress={addReview} />
+                <Button title="Add Review" onPress={openAddReviewSheet} />
                 <Button title="Disconnect" onPress={disconnect} />
               </View>
             </>
@@ -153,8 +191,12 @@ export default function App() {
             <Button title="Connect Phantom" onPress={connect} />
           )}
         </View>
-        <MovieList />
-        <AddReviewSheet actionSheetRef={actionSheetRef} />
+        <MovieList connection={connection} />
+        <AddReviewSheet
+          actionSheetRef={actionSheetRef}
+          phantomWalletPublicKey={phantomWalletPublicKey}
+          signAndSendTransaction={signAndSendTransaction}
+        />
         <StatusBar style="auto" />
       </SafeAreaView>
     </SafeAreaProvider>
