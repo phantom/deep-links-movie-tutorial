@@ -1,10 +1,19 @@
-import { Text, StyleSheet, Pressable } from "react-native";
+import {
+  Text,
+  StyleSheet,
+  Pressable,
+  GestureResponderEvent,
+} from "react-native";
 
-export default function Button(props: any) {
-  const { onPress, title = "Save" } = props;
+interface ButtonProps {
+  onPress: (event: GestureResponderEvent) => void;
+  title: string;
+}
+
+export default function Button(props: ButtonProps) {
   return (
-    <Pressable style={styles.button} onPress={onPress}>
-      <Text style={styles.text}>{title}</Text>
+    <Pressable style={styles.button} onPress={props.onPress}>
+      <Text style={styles.text}>{props.title}</Text>
     </Pressable>
   );
 }

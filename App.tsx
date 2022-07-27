@@ -3,7 +3,7 @@ import "react-native-url-polyfill/auto";
 import { Buffer } from "buffer";
 global.Buffer = global.Buffer || Buffer;
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import * as Linking from "expo-linking";
 import nacl from "tweetnacl";
@@ -15,6 +15,8 @@ import { buildUrl } from "./utils/buildUrl";
 import { MovieList } from "./components/MovieList";
 import Button from "./components/Button";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import ActionSheet from "react-native-actions-sheet";
+import AddReviewSheet from "./components/AddReviewSheet";
 
 const onConnectRedirectLink = Linking.createURL("onConnect");
 const onDisconnectRedirectLink = Linking.createURL("onDisconnect");
@@ -27,6 +29,8 @@ export default function App() {
   const [session, setSession] = useState<string>();
   const [phantomWalletPublicKey, setPhantomWalletPublicKey] =
     useState<PublicKey | null>();
+
+  const actionSheetRef = useRef<ActionSheet>(null);
 
   useEffect(() => {
     const initializeDeeplinks = async () => {
@@ -120,7 +124,8 @@ export default function App() {
   };
 
   const addReview = async () => {
-    console.log("adding review");
+    console.log("adding review test again");
+    actionSheetRef.current?.show();
   };
 
   return (
@@ -136,7 +141,7 @@ export default function App() {
                   numberOfLines={1}
                   ellipsizeMode="middle"
                 >
-                  {phantomWalletPublicKey.toString()}
+                  {`Connected to: ${phantomWalletPublicKey.toString()}`}
                 </Text>
               </View>
               <View style={styles.row}>
@@ -149,6 +154,7 @@ export default function App() {
           )}
         </View>
         <MovieList />
+        <AddReviewSheet actionSheetRef={actionSheetRef} />
         <StatusBar style="auto" />
       </SafeAreaView>
     </SafeAreaProvider>
@@ -176,12 +182,14 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
+    marginBottom: 5,
   },
   text: {
     color: "rgb(119, 119, 119)",
   },
   wallet: {
     alignItems: "center",
-    marginBottom: 10,
+    margin: 10,
+    marginBottom: 15,
   },
 });

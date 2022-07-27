@@ -3,6 +3,7 @@ import { Movie } from "../models/Movie";
 import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
 import { MovieCoordinator } from "./MovieCoordinator";
 import { FlatList, View, Text, TextInput, StyleSheet } from "react-native";
+import Input from "./Input";
 
 const connection = new Connection(clusterApiUrl("devnet"));
 
@@ -51,13 +52,18 @@ export const MovieList: FC = () => {
 
   return (
     <View style={{ flexGrow: 1 }}>
-      <TextInput
+      <Input
+        value={search}
+        placeholder="Search movies..."
+        onChangeText={setSearch}
+      />
+      {/* <TextInput
         value={search}
         placeholder="Search movies..."
         placeholderTextColor="rgb(119, 119, 119)"
         onChangeText={setSearch}
         style={styles.input}
-      />
+      /> */}
       <FlatList
         ItemSeparatorComponent={() => <View style={{ marginTop: 20 }} />}
         data={movies}
