@@ -1,10 +1,10 @@
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch } from "react";
 import { TextInput, StyleSheet } from "react-native";
+import { COLORS } from "../constants";
 
 interface InputProps {
   value: string;
   placeholder: string;
-  // onChangeText: Dispatch<SetStateAction<string>>;
   onChangeText: Dispatch<string>;
   keyboardType?: "default" | "numeric";
 }
@@ -20,7 +20,7 @@ export default function Input({
       value={value}
       placeholder={placeholder}
       keyboardType={keyboardType}
-      placeholderTextColor="rgb(119, 119, 119)"
+      placeholderTextColor={COLORS.LIGHT_GREY}
       onChangeText={onChangeText}
       style={styles.input}
     />
@@ -32,10 +32,10 @@ const styles = StyleSheet.create({
     margin: 12,
     borderWidth: 1,
     padding: 14,
-    backgroundColor: "rgb(24, 24, 24)",
-    borderColor: "rgb(91, 91, 91)",
+    backgroundColor: COLORS.DARKER_GREY_2,
+    borderColor: COLORS.GREY_2,
     borderRadius: 6,
-    color: "white",
+    color: COLORS.WHITE,
     fontSize: 16,
   },
 });

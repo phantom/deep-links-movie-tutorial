@@ -5,9 +5,9 @@ import {
   TransactionInstruction,
 } from "@solana/web3.js";
 import { RefObject, useState } from "react";
-import { View, StyleSheet, Alert } from "react-native";
+import { View, StyleSheet } from "react-native";
 import ActionSheet from "react-native-actions-sheet";
-import { MOVIE_REVIEW_PROGRAM_ID } from "../constants";
+import { COLORS, MOVIE_REVIEW_PROGRAM_ID } from "../constants";
 import { Movie } from "../models/Movie";
 import Button from "./Button";
 import Input from "./Input";
@@ -131,6 +131,6 @@ const styles = StyleSheet.create({
     paddingBottom: 50,
   },
   sheet: {
-    backgroundColor: "rgb(34, 34, 34)",
+    backgroundColor: COLORS.DARK_GREY,
   },
 });

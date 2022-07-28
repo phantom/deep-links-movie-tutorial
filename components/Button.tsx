@@ -4,6 +4,7 @@ import {
   Pressable,
   GestureResponderEvent,
 } from "react-native";
+import { COLORS } from "../constants";
 
 interface ButtonProps {
   onPress: (event: GestureResponderEvent) => void;
@@ -32,15 +33,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     borderRadius: 60,
     elevation: 3,
-    backgroundColor: "rgb(78, 68, 206)",
+    backgroundColor: COLORS.PURPLE,
   },
   disabled: {
-    backgroundColor: "grey",
+    backgroundColor: COLORS.GREY_2,
   },
   text: {
     fontSize: 16,
     lineHeight: 19,
     fontWeight: "600",
-    color: "white",
+    color: COLORS.WHITE,
   },
 });

@@ -4,7 +4,7 @@ import { Buffer } from "buffer";
 global.Buffer = global.Buffer || Buffer;
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useRef, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import * as Linking from "expo-linking";
 import nacl from "tweetnacl";
 import bs58 from "bs58";
@@ -22,6 +22,9 @@ import Button from "./components/Button";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import ActionSheet from "react-native-actions-sheet";
 import AddReviewSheet from "./components/AddReviewSheet";
+import Toast from "react-native-toast-message";
+import { toastConfig } from "./components/ToastConfig";
+import { COLORS } from "./constants";
 
 const onConnectRedirectLink = Linking.createURL("onConnect");
 const onDisconnectRedirectLink = Linking.createURL("onDisconnect");
@@ -39,6 +42,8 @@ export default function App() {
   const [session, setSession] = useState<string>();
   const [phantomWalletPublicKey, setPhantomWalletPublicKey] =
     useState<PublicKey | null>(null);
+
+  const [submitting, setSubmitting] = useState(false);
 
   const actionSheetRef = useRef<ActionSheet>(null);
 
@@ -61,16 +66,23 @@ export default function App() {
 
   // Handle in-bound links
   useEffect(() => {
+    setSubmitting(false);
     if (!deeplink) return;
 
     const url = new URL(deeplink);
     const params = url.searchParams;
 
     if (params.get("errorCode")) {
-      console.log(
-        "error: ",
-        JSON.stringify(Object.fromEntries([...params]), null, 2)
-      );
+      const error = Object.fromEntries([...params]);
+      const message =
+        error?.errorMessage ??
+        JSON.stringify(Object.fromEntries([...params]), null, 2);
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: message,
+      });
+      console.log("error: ", message);
       return;
     }
 
@@ -88,6 +100,7 @@ export default function App() {
       setSharedSecret(sharedSecretDapp);
       setSession(connectData.session);
       setPhantomWalletPublicKey(new PublicKey(connectData.public_key));
+
       console.log(`connected to ${connectData.public_key.toString()}`);
     }
 
@@ -106,6 +119,11 @@ export default function App() {
         sharedSecret
       );
       console.log("signAndSendTrasaction: ", signAndSendTransactionData);
+      Toast.show({
+        type: "success",
+        text1: "Review submitted 🎥",
+        text2: signAndSendTransactionData.signature,
+      });
     }
   }, [deeplink]);
 
@@ -137,9 +155,10 @@ export default function App() {
     Linking.openURL(url);
   };
 
-  // Initiate a new transaction via Phantom. We call this in `AddReviewSheet.tsx` to send our review to the Solana network
+  // Initiate a new transaction via Phantom. We call this in `components/AddReviewSheet.tsx` to send our review to the Solana network
   const signAndSendTransaction = async (transaction: Transaction) => {
     if (!phantomWalletPublicKey) return;
+    setSubmitting(true);
     transaction.feePayer = phantomWalletPublicKey;
     transaction.recentBlockhash = (
       await connection.getLatestBlockhash()
@@ -162,6 +181,7 @@ export default function App() {
     Linking.openURL(url);
   };
 
+  // Open the 'Add a Review' sheet defined in `components/AddReviewSheet.tsx`
   const openAddReviewSheet = () => {
     actionSheetRef.current?.show();
   };
@@ -191,12 +211,20 @@ export default function App() {
             <Button title="Connect Phantom" onPress={connect} />
           )}
         </View>
+        {submitting && (
+          <ActivityIndicator
+            color={COLORS.WHITE}
+            size="large"
+            style={styles.spinner}
+          />
+        )}
         <MovieList connection={connection} />
         <AddReviewSheet
           actionSheetRef={actionSheetRef}
           phantomWalletPublicKey={phantomWalletPublicKey}
           signAndSendTransaction={signAndSendTransaction}
         />
+        <Toast config={toastConfig} />
         <StatusBar style="auto" />
       </SafeAreaView>
     </SafeAreaProvider>
@@ -206,15 +234,16 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "rgb(34, 34, 34)",
+    backgroundColor: COLORS.DARK_GREY,
     flexGrow: 1,
+    position: "relative",
   },
   greenDot: {
     height: 8,
     width: 8,
     borderRadius: 10,
     marginRight: 5,
-    backgroundColor: "rgb(33, 229, 111)",
+    backgroundColor: COLORS.GREEN,
   },
   header: {
     width: "95%",
@@ -226,8 +255,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 5,
   },
+  spinner: {
+    position: "absolute",
+    alignSelf: "center",
+    top: "50%",
+    zIndex: 1000,
+  },
   text: {
-    color: "rgb(119, 119, 119)",
+    color: COLORS.LIGHT_GREY,
   },
   wallet: {
     alignItems: "center",

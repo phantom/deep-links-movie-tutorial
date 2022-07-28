@@ -4,8 +4,7 @@ import { Connection } from "@solana/web3.js";
 import { MovieCoordinator } from "./MovieCoordinator";
 import { FlatList, View, Text, StyleSheet } from "react-native";
 import Input from "./Input";
-
-// const connection = new Connection(clusterApiUrl("devnet"));
+import { COLORS } from "../constants";
 
 interface MovieListProps {
   connection: Connection;
@@ -90,13 +89,13 @@ export default function MovieList({ connection }: MovieListProps) {
 
 const styles = StyleSheet.create({
   description: {
-    color: "rgb(119, 119, 119)",
+    color: COLORS.LIGHT_GREY,
     fontSize: 14,
   },
   item: {
     flexGrow: 1,
     padding: 10,
-    backgroundColor: "rgb(42, 42, 42)",
+    backgroundColor: COLORS.GREY,
     borderRadius: 6,
     height: 80,
     width: "95%",
@@ -113,12 +112,12 @@ const styles = StyleSheet.create({
     flexDirection: "column",
   },
   rating: {
-    color: "white",
+    color: COLORS.WHITE,
     fontWeight: "500",
     fontSize: 14,
   },
   title: {
-    color: "white",
+    color: COLORS.WHITE,
     fontWeight: "600",
     fontSize: 16,
   },
