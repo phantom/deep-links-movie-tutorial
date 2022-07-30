@@ -5,6 +5,7 @@ import { MovieCoordinator } from "./MovieCoordinator";
 import { FlatList, View, Text, StyleSheet } from "react-native";
 import Input from "./Input";
 import { COLORS } from "../constants";
+import { usePrevious } from "../utils/usePrevious";
 
 interface MovieListProps {
   connection: Connection;
@@ -12,58 +13,55 @@ interface MovieListProps {
 
 export default function MovieList({ connection }: MovieListProps) {
   const [movies, setMovies] = useState<(Movie | null)[]>([]);
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
+  const [userInput, setUserInput] = useState({
+    page: 1,
+    search: "",
+  });
+
+  const previousUserInput = usePrevious(userInput);
 
   useEffect(() => {
-    console.log("search: ", search);
-    // console.log("page: ", page);
-    MovieCoordinator.fetchPage(
-      connection,
-      movies.length > 0 ? movies.length / 10 : 1,
-      10,
-      search,
-      search !== ""
-    ).then((fetchedMovies) => {
-      console.log("received " + fetchedMovies.length + " movies");
-      search
-        ? setMovies(fetchedMovies)
-        : setMovies((movies) => [...movies, ...fetchedMovies]);
-      // setMovies(fetchedMovies);
-    });
-  }, [search, page]);
+    const { page, search } = userInput;
 
-  // useEffect(() => {
-  //   console.log("fetch movies search");
-  //   MovieCoordinator.fetchPage(connection, 1, 10, search, search !== "").then(
-  //     (fetchedMovies) => {
-  //       console.log("received " + fetchedMovies.length + " movies from search");
-  //       setMovies(fetchedMovies);
-  //     }
-  //   );
-  // }, [search]);
+    let shouldReload = false;
+    if (
+      typeof previousUserInput?.search != "undefined" &&
+      previousUserInput.search !== search
+    ) {
+      shouldReload = true;
+    }
 
-  // useEffect(() => {
-  //   console.log("fetch movies scroll");
-  //   MovieCoordinator.fetchPage(connection, page, 10, "", false).then(
-  //     (fetchedMovies) => {
-  //       console.log("received " + fetchedMovies.length + " movies from scroll");
-  //       setMovies((movies) => [...movies, ...fetchedMovies]);
-  //     }
-  //   );
-  // }, [page]);
+    MovieCoordinator.fetchPage(connection, page, 10, search, shouldReload).then(
+      (fetchedMovies) => {
+        console.log(
+          `fetch complete, received ${fetchedMovies.length} new movies`
+        );
+        shouldReload
+          ? setMovies(fetchedMovies)
+          : setMovies((movies) => [...movies, ...fetchedMovies]);
+      }
+    );
+  }, [userInput]);
+
+  const handleScroll = () =>
+    movies.length < 10
+      ? null
+      : setUserInput((prev) => ({ page: prev.page + 1, search: prev.search }));
+
+  const handleSearch = (text: string) =>
+    setUserInput((prev) => ({ page: 1, search: text }));
 
   return (
     <View style={{ flexGrow: 1 }}>
       <Input
-        value={search}
+        value={userInput.search}
         placeholder="Search movies..."
-        onChangeText={setSearch}
+        onChangeText={handleSearch}
       />
       <FlatList
         ItemSeparatorComponent={() => <View style={{ marginTop: 20 }} />}
         data={movies}
-        onEndReached={() => setPage(page + 1)}
+        onEndReached={handleScroll}
         contentContainerStyle={styles.list}
         renderItem={({ item, index }) => (
           <View style={styles.item} key={index}>

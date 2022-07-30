@@ -72,6 +72,7 @@ export default function App() {
     const url = new URL(deeplink);
     const params = url.searchParams;
 
+    // Handle an error response from Phantom
     if (params.get("errorCode")) {
       const error = Object.fromEntries([...params]);
       const message =
@@ -100,7 +101,6 @@ export default function App() {
       setSharedSecret(sharedSecretDapp);
       setSession(connectData.session);
       setPhantomWalletPublicKey(new PublicKey(connectData.public_key));
-
       console.log(`connected to ${connectData.public_key.toString()}`);
     }
 
@@ -155,7 +155,7 @@ export default function App() {
     Linking.openURL(url);
   };
 
-  // Initiate a new transaction via Phantom. We call this in `components/AddReviewSheet.tsx` to send our review to the Solana network
+  // Initiate a new transaction via Phantom. We call this in `components/AddReviewSheet.tsx` to send our movie review to the Solana network
   const signAndSendTransaction = async (transaction: Transaction) => {
     if (!phantomWalletPublicKey) return;
     setSubmitting(true);
@@ -208,7 +208,9 @@ export default function App() {
               </View>
             </>
           ) : (
-            <Button title="Connect Phantom" onPress={connect} />
+            <View style={{ marginTop: 15 }}>
+              <Button title="Connect Phantom" onPress={connect} />
+            </View>
           )}
         </View>
         {submitting && (
