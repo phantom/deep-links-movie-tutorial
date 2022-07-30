@@ -265,6 +265,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: COLORS.LIGHT_GREY,
+    width: "100%",
   },
   wallet: {
     alignItems: "center",
