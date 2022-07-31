@@ -12,8 +12,11 @@ interface ButtonProps {
   disabled?: boolean;
 }
 
-export default function Button(props: ButtonProps) {
-  const { title, onPress, disabled = false } = props;
+export default function Button({
+  title,
+  onPress,
+  disabled = false,
+}: ButtonProps) {
   return (
     <Pressable
       style={disabled ? [styles.button, styles.disabled] : styles.button}

@@ -32,8 +32,11 @@ const INITIAL_STATE = {
   description: "",
 };
 
-export default function AddReviewSheet(props: AddReviewSheetProps) {
-  const { phantomWalletPublicKey, signAndSendTransaction } = props;
+export default function AddReviewSheet({
+  actionSheetRef,
+  phantomWalletPublicKey,
+  signAndSendTransaction,
+}: AddReviewSheetProps) {
   const [values, setValues] = useState<InputValues>(INITIAL_STATE);
 
   const checkRatingLimit = (rating: string) => {
@@ -92,7 +95,7 @@ export default function AddReviewSheet(props: AddReviewSheetProps) {
   };
 
   return (
-    <ActionSheet ref={props.actionSheetRef} containerStyle={styles.sheet}>
+    <ActionSheet ref={actionSheetRef} containerStyle={styles.sheet}>
       <View style={styles.form}>
         <View style={styles.fields}>
           <Input
