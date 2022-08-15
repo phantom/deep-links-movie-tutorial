@@ -19,6 +19,7 @@ import AddReviewSheet from "./components/AddReviewSheet";
 import Toast from "react-native-toast-message";
 import { toastConfig } from "./components/ToastConfig";
 import { COLORS } from "./constants";
+import * as Linking from "expo-linking";
 
 const connection = new Connection(clusterApiUrl("devnet"));
 
