@@ -132,7 +132,7 @@ export default function App() {
     const params = new URLSearchParams({
       dapp_encryption_public_key: bs58.encode(dappKeyPair.publicKey),
       cluster: "devnet",
-      app_url: "https://phantom.app",
+      app_url: "https://deeplink-movie-tutorial-dummy-site.vercel.app/",
       redirect_link: onConnectRedirectLink,
     });
     const url = buildUrl("connect", params);
